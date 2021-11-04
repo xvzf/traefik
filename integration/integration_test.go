@@ -43,7 +43,7 @@ func Test(t *testing.T) {
 
 	if *container {
 		// tests launched from a container
-		//check.Suite(&AccessLogSuite{})
+		// check.Suite(&AccessLogSuite{})
 		check.Suite(&AcmeSuite{})
 		// check.Suite(&EtcdSuite{})
 		// check.Suite(&ConsulSuite{})

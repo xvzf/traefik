@@ -5,9 +5,11 @@ services:
       - traefik.enable=true
       - traefik.http.routers.router1.rule=PathPrefix("/whoami")
       - traefik.http.routers.router2.rule=PathPrefix("/whoami2")
-    network_mode: "bridge"
   whoami2:
     image: traefik/whoami
     labels:
       - traefik.enable=false
-    network_mode: "bridge"
+networks:
+  default:
+    external: true
+    name: test-net

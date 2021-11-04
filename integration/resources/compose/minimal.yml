@@ -6,4 +6,7 @@ services:
       - traefik.enable=true
     deploy:
       replicas: 2
-    network_mode: "bridge"
+networks:
+  default:
+    external: true
+    name: test-net

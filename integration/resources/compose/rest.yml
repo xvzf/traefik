@@ -3,4 +3,7 @@ services:
     image: traefik/whoami
     ports:
       - "8881:80"
-    network_mode: "bridge"
+networks:
+  default:
+    external: true
+    name: test-net

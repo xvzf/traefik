@@ -6,7 +6,6 @@ services:
       JAVA_OPTS: -Dlogging.level.zipkin=DEBUG
     ports:
       - 9411:9411
-    network_mode: "bridge"
   jaeger:
     image: jaegertracing/all-in-one:1.14
     environment:
@@ -21,4 +20,7 @@ services:
       - "9411:9411"
   whoami:
     image: traefik/whoami
-    network_mode: "bridge"
+networks:
+  default:
+    external: true
+    name: test-net

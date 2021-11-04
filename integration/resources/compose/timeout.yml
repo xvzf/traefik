@@ -6,4 +6,7 @@ services:
       - PORT=9000
     ports:
       - "9000:9000"
-    network_mode: "bridge"
+networks:
+  default:
+    external: true
+    name: test-net

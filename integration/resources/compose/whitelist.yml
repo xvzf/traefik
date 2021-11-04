@@ -6,7 +6,6 @@ services:
       - traefik.http.routers.rt1.rule=Host("no.override.whitelist.docker.local")
       - traefik.http.routers.rt1.middlewares=wl1
       - traefik.http.middlewares.wl1.ipwhiteList.sourceRange=8.8.8.8
-    network_mode: "bridge"
   overrideIPStrategyRemoteAddrWhitelist:
     image: traefik/whoami
     labels:
@@ -15,7 +14,6 @@ services:
       - traefik.http.routers.rt2.middlewares=wl2
       - traefik.http.middlewares.wl2.ipwhitelist.sourceRange=8.8.8.8
       - traefik.http.middlewares.wl2.ipwhitelist.ipStrategy=true
-    network_mode: "bridge"
   overrideIPStrategyDepthWhitelist:
     image: traefik/whoami
     labels:
@@ -24,7 +22,6 @@ services:
     - traefik.http.routers.rt3.middlewares=wl3
     - traefik.http.middlewares.wl3.ipwhitelist.sourceRange=8.8.8.8
     - traefik.http.middlewares.wl3.ipwhitelist.ipStrategy.depth=3
-    network_mode: "bridge"
   overrideIPStrategyExcludedIPsWhitelist:
     image: traefik/whoami
     labels:
@@ -33,4 +30,7 @@ services:
     - traefik.http.routers.rt4.middlewares=wl4
     - traefik.http.middlewares.wl4.ipwhitelist.sourceRange=8.8.8.8
     - traefik.http.middlewares.wl4.ipwhitelist.ipStrategy.excludedIPs=10.0.0.1,10.0.0.2
-    network_mode: "bridge"
+networks:
+  default:
+    external: true
+    name: test-net

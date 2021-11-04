@@ -1,4 +1,7 @@
 services:
   whoami:
     image: traefik/whoami
-    network_mode: "bridge"
+networks:
+  default:
+    external: true
+    name: test-net

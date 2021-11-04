@@ -3,4 +3,7 @@ services:
     image: redis:5.0
     ports:
       - "6379:6379"
-    network_mode: "bridge"
+networks:
+  default:
+    external: true
+    name: test-net
