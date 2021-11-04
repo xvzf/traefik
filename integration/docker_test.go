@@ -79,8 +79,8 @@ type DockerSuite struct {
 
 func (s *DockerSuite) SetUpSuite(c *check.C) {
 	s.createComposeProject(c, "docker")
-	err := s.dockerService.Up(context.Background(), s.composeProject, api.UpOptions{})
-	c.Assert(err, checker.IsNil)
+	/*err := s.dockerService.Up(context.Background(), s.composeProject, api.UpOptions{})
+	c.Assert(err, checker.IsNil)*/
 }
 
 func (s *DockerSuite) TearDownTest(c *check.C) {
@@ -123,12 +123,20 @@ func (s *DockerSuite) TestDefaultDockerContainers(c *check.C) {
 	file := s.adaptFile(c, "fixtures/docker/simple.toml", tempObjects)
 	defer os.Remove(file)
 
-	err := s.dockerService.Up(context.Background(), s.composeProject, api.UpOptions{})
+	err := s.dockerService.Create(context.Background(), s.composeProject, api.CreateOptions{
+		Services: []string{"simple"},
+	})
 	c.Assert(err, checker.IsNil)
 
-	containers, err := s.dockerService.Ps(context.Background(), "simple", api.PsOptions{})
+	s.dockerService.Start(context.Background(), s.composeProject, api.StartOptions{})
 	c.Assert(err, checker.IsNil)
-	c.Assert(containers, checker.Count, 1)
+
+	fmt.Println("sleeping ...")
+	time.Sleep(20 * time.Second)
+
+	containers, err := s.dockerService.Ps(context.Background(), s.composeProject.Name, api.PsOptions{})
+	c.Assert(err, checker.IsNil)
+	c.Assert(containers, checker.HasLen, 1)
 
 	// Start traefik
 	cmd, display := s.traefikCmd(withConfigFile(file))
@@ -152,6 +160,9 @@ func (s *DockerSuite) TestDefaultDockerContainers(c *check.C) {
 
 	c.Assert(json.Unmarshal(body, &version), checker.IsNil)
 	c.Assert(version["Version"], checker.Equals, "swarm/1.0.0")
+
+	err = s.dockerService.Stop(context.Background(), s.composeProject, api.StopOptions{})
+	c.Assert(err, checker.IsNil)
 }
 
 func (s *DockerSuite) TestDockerContainersWithTCPLabels(c *check.C) {
@@ -166,12 +177,13 @@ func (s *DockerSuite) TestDockerContainersWithTCPLabels(c *check.C) {
 	file := s.adaptFile(c, "fixtures/docker/simple.toml", tempObjects)
 	defer os.Remove(file)
 
-	err := s.dockerService.Up(context.Background(), s.composeProject, api.UpOptions{})
-	c.Assert(err, checker.IsNil)
+	err := s.dockerService.Create(context.Background(), s.composeProject, api.CreateOptions{
+		Services: []string{"withtcplabels"},
+	})
 
 	containers, err := s.dockerService.Ps(context.Background(), "withtcplabels", api.PsOptions{})
 	c.Assert(err, checker.IsNil)
-	c.Assert(containers, checker.Count, 1)
+	c.Assert(containers, checker.HasLen, 1)
 
 	// Start traefik
 	cmd, display := s.traefikCmd(withConfigFile(file))
@@ -187,6 +199,8 @@ func (s *DockerSuite) TestDockerContainersWithTCPLabels(c *check.C) {
 	c.Assert(err, checker.IsNil)
 
 	c.Assert(who, checker.Contains, "my.super.host")
+	err = s.dockerService.Stop(context.Background(), s.composeProject, api.StopOptions{})
+	c.Assert(err, checker.IsNil)
 }
 
 func (s *DockerSuite) TestDockerContainersWithLabels(c *check.C) {

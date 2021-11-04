@@ -35,7 +35,7 @@ func (s *DockerComposeSuite) TestComposeScale(c *check.C) {
 	serviceCount := 2
 	composeService := "whoami1"
 
-	s.composeProject.Services[2].Scale = serviceCount
+	s.composeProject.Services[0].Scale = serviceCount
 
 	tempObjects := struct {
 		DockerHost  string
@@ -77,7 +77,7 @@ func (s *DockerComposeSuite) TestComposeScale(c *check.C) {
 		if strings.HasSuffix(name, "@internal") {
 			continue
 		}
-		c.Assert(name, checker.Equals, composeService+"-integrationtest"+composeProject+"@docker")
+		c.Assert(name, checker.Equals, composeService+"-"+composeProject+"@docker")
 		c.Assert(service.LoadBalancer.Servers, checker.HasLen, serviceCount)
 		// We could break here, but we don't just to keep us honest.
 	}

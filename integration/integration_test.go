@@ -44,17 +44,17 @@ func Test(t *testing.T) {
 	if *container {
 		// tests launched from a container
 		// check.Suite(&AccessLogSuite{})
-		check.Suite(&AcmeSuite{})
+		// check.Suite(&AcmeSuite{})
 		// check.Suite(&EtcdSuite{})
 		// check.Suite(&ConsulSuite{})
 		// check.Suite(&ConsulCatalogSuite{})
 		// check.Suite(&DockerComposeSuite{})
-		// check.Suite(&DockerSuite{})
-		// check.Suite(&ErrorPagesSuite{})
-		// check.Suite(&FileSuite{})
-		// check.Suite(&GRPCSuite{})
-		// check.Suite(&HealthCheckSuite{})
-		// check.Suite(&HeadersSuite{})
+		check.Suite(&DockerSuite{})
+		check.Suite(&ErrorPagesSuite{})
+		check.Suite(&FileSuite{})
+		check.Suite(&GRPCSuite{})
+		check.Suite(&HealthCheckSuite{})
+		check.Suite(&HeadersSuite{})
 		// check.Suite(&HostResolverSuite{})
 		// check.Suite(&HTTPSuite{})
 		// check.Suite(&HTTPSSuite{})
@@ -113,6 +113,7 @@ func (s *BaseSuite) createComposeProject(c *check.C, name string) {
 
 	s.composeProject, err = cli.ProjectFromOptions(ops)
 	c.Assert(err, checker.IsNil)
+	s.composeProject.Name = name
 }
 
 func withConfigFile(file string) string {
