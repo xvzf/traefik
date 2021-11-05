@@ -49,12 +49,12 @@ func Test(t *testing.T) {
 		// check.Suite(&ConsulSuite{})
 		// check.Suite(&ConsulCatalogSuite{})
 		// check.Suite(&DockerComposeSuite{})
-		// check.Suite(&DockerSuite{})
+		check.Suite(&DockerSuite{})
 		// check.Suite(&ErrorPagesSuite{})
 		// check.Suite(&FileSuite{})
 		// check.Suite(&GRPCSuite{})
 		check.Suite(&HealthCheckSuite{})
-		check.Suite(&HeadersSuite{})
+		/*check.Suite(&HeadersSuite{})
 		check.Suite(&HostResolverSuite{})
 		check.Suite(&HTTPSuite{})
 		check.Suite(&HTTPSSuite{})
@@ -72,7 +72,7 @@ func Test(t *testing.T) {
 		check.Suite(&TracingSuite{})
 		check.Suite(&UDPSuite{})
 		check.Suite(&WebsocketSuite{})
-		check.Suite(&ZookeeperSuite{})
+		check.Suite(&ZookeeperSuite{})*/
 	}
 	if *host {
 		// tests launched from the host

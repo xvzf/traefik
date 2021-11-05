@@ -261,8 +261,8 @@ func (s *DockerSuite) TestRestartDockerContainers(c *check.C) {
 
 	time.Sleep(5 * time.Second)
 
-	err = try.GetRequest("http://127.0.0.1:8080/api/rawdata", 10*time.Second, try.BodyNotContains("powpow"))
-	c.Assert(err, checker.IsNil)
+	err = try.GetRequest("http://127.0.0.1:8080/api/rawdata", 15*time.Second, try.BodyContains("powpow"))
+	c.Assert(err, checker.NotNil)
 
 	s.startServicesOnly(c, []string{"powpow"})
 	err = try.GetRequest("http://127.0.0.1:8080/api/rawdata", 60*time.Second, try.BodyContains("powpow"))
