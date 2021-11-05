@@ -47,7 +47,7 @@ func Test(t *testing.T) {
 		check.Suite(&AcmeSuite{})
 		check.Suite(&EtcdSuite{})
 		check.Suite(&ConsulSuite{})
-		check.Suite(&ConsulCatalogSuite{})
+		//check.Suite(&ConsulCatalogSuite{})
 		check.Suite(&DockerComposeSuite{})
 		check.Suite(&DockerSuite{})
 		check.Suite(&ErrorPagesSuite{})
