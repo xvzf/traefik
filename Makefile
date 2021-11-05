@@ -93,7 +93,7 @@ pull-images:
 	grep --no-filename -E '^\s+image:' ./integration/resources/compose/*.yml | awk '{print $$2}' | sort | uniq | xargs -P 6 -n 1 docker pull
 
 test-network:
-	docker network create test-net || echo ""
+	docker network create test-net --driver bridge --subnet 172.17.0.0/24 || echo ""
 
 ## Run the integration tests
 test-integration: $(PRE_TARGET) binary test-network

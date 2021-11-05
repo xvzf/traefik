@@ -134,7 +134,7 @@ func (s *AccessLogSuite) TestAccessLogAuthFrontend(c *check.C) {
 			code:       "200",
 			user:       "test",
 			routerName: "rt-authFrontend",
-			serviceURL: "http://172.[0-9]+.0",
+			serviceURL: "http://172.17.0",
 		},
 	}
 
@@ -203,7 +203,7 @@ func (s *AccessLogSuite) TestAccessLogDigestAuthMiddleware(c *check.C) {
 			code:       "200",
 			user:       "test",
 			routerName: "rt-digestAuthMiddleware",
-			serviceURL: "http://172.[0-9]+.0",
+			serviceURL: "http://172.17.0",
 		},
 	}
 
@@ -506,7 +506,7 @@ func (s *AccessLogSuite) TestAccessLogAuthFrontendSuccess(c *check.C) {
 			code:       "200",
 			user:       "test",
 			routerName: "rt-authFrontend",
-			serviceURL: "http://172.[0-9]+.0",
+			serviceURL: "http://172.17.0",
 		},
 	}
 
