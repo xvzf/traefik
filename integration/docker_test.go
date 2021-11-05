@@ -16,71 +16,13 @@ import (
 	checker "github.com/vdemeester/shakers"
 )
 
-// Images to have or pull before the build in order to make it work.
-// FIXME handle this offline but loading them before build.
-/*var RequiredImages = map[string]string{
-	"swarm":          "1.0.0",
-	"traefik/whoami": "latest",
-}
-*/
-
 // Docker tests suite.
 type DockerSuite struct {
 	BaseSuite
 }
 
-// func (s *DockerSuite) startContainer(c *check.C, image string, args ...string) string {
-// 	return s.startContainerWithConfig(c, image, d.ContainerConfig{
-// 		Cmd: args,
-// 	})
-// }
-
-// func (s *DockerSuite) startContainerWithLabels(c *check.C, image string, labels map[string]string, args ...string) string {
-// 	return s.startContainerWithConfig(c, image, d.ContainerConfig{
-// 		Cmd:    args,
-// 		Labels: labels,
-// 	})
-// }
-
-// func (s *DockerSuite) startContainerWithNameAndLabels(c *check.C, name, image string, labels map[string]string, args ...string) string {
-// 	return s.startContainerWithConfig(c, image, d.ContainerConfig{
-// 		Name:   name,
-// 		Cmd:    args,
-// 		Labels: labels,
-// 	})
-//}
-
-// func (s *DockerSuite) startContainerWithConfig(c *check.C, image string, config d.ContainerConfig) string {
-// 	if config.Name == "" {
-// 		config.Name = namesgenerator.GetRandomName(10)
-// 	}
-
-// 	container := s.project.StartWithConfig(c, image, config)
-
-// 	// FIXME(vdemeester) this is ugly (it's because of the / in front of the name in docker..)
-// 	return strings.SplitAfter(container.Name, "/")[1]
-// }
-
-// func (s *DockerSuite) stopAndRemoveContainerByName(c *check.C, name string) {
-// 	s.project.Stop(c, name)
-// 	s.project.Remove(c, name)
-// }
-
-// func (s *DockerSuite) SetUpSuite(c *check.C) {
-// 	project := docker.NewProjectFromEnv(c)
-// 	s.project = project
-
-// 	// Pull required images
-// 	for repository, tag := range RequiredImages {
-// 		image := fmt.Sprintf("%s:%s", repository, tag)
-// 		s.project.Pull(c, image)
-// 	}
-// }
-
 func (s *DockerSuite) SetUpSuite(c *check.C) {
 	s.createComposeProject(c, "docker")
-	/*err := s.dockerService.Up(context.Background(), s.composeProject, api.UpOptions{})
-	c.Assert(err, checker.IsNil)*/
 }
 
 func (s *DockerSuite) TearDownTest(c *check.C) {
@@ -98,6 +40,8 @@ func (s *DockerSuite) TestSimpleConfiguration(c *check.C) {
 
 	file := s.adaptFile(c, "fixtures/docker/simple.toml", tempObjects)
 	defer os.Remove(file)
+
+	s.startServicesOnly(c, nil)
 
 	cmd, display := s.traefikCmd(withConfigFile(file))
 	defer display(c)
@@ -123,18 +67,10 @@ func (s *DockerSuite) TestDefaultDockerContainers(c *check.C) {
 	file := s.adaptFile(c, "fixtures/docker/simple.toml", tempObjects)
 	defer os.Remove(file)
 
-	err := s.dockerService.Create(context.Background(), s.composeProject, api.CreateOptions{
-		Services: []string{"simple"},
-	})
-	c.Assert(err, checker.IsNil)
-
-	s.dockerService.Start(context.Background(), s.composeProject, api.StartOptions{})
-	c.Assert(err, checker.IsNil)
-
-	fmt.Println("sleeping ...")
-	time.Sleep(20 * time.Second)
+	s.startServicesOnly(c, []string{"simple"})
 
 	containers, err := s.dockerService.Ps(context.Background(), s.composeProject.Name, api.PsOptions{})
+	containers = s.filterRunning(containers)
 	c.Assert(err, checker.IsNil)
 	c.Assert(containers, checker.HasLen, 1)
 
@@ -147,7 +83,7 @@ func (s *DockerSuite) TestDefaultDockerContainers(c *check.C) {
 
 	req, err := http.NewRequest(http.MethodGet, "http://127.0.0.1:8000/version", nil)
 	c.Assert(err, checker.IsNil)
-	req.Host = fmt.Sprintf("%s.docker.localhost", strings.ReplaceAll(containers[0].Name, "_", "-"))
+	req.Host = fmt.Sprintf("%s-%s.docker.localhost", containers[0].Service, containers[0].Project)
 
 	// FIXME Need to wait than 500 milliseconds more (for swarm or traefik to boot up ?)
 	resp, err := try.ResponseUntilStatusCode(req, 1500*time.Millisecond, http.StatusOK)
@@ -177,11 +113,10 @@ func (s *DockerSuite) TestDockerContainersWithTCPLabels(c *check.C) {
 	file := s.adaptFile(c, "fixtures/docker/simple.toml", tempObjects)
 	defer os.Remove(file)
 
-	err := s.dockerService.Create(context.Background(), s.composeProject, api.CreateOptions{
-		Services: []string{"withtcplabels"},
-	})
+	s.startServicesOnly(c, []string{"withtcplables"})
 
-	containers, err := s.dockerService.Ps(context.Background(), "withtcplabels", api.PsOptions{})
+	containers, err := s.dockerService.Ps(context.Background(), s.composeProject.Name, api.PsOptions{})
+	containers = s.filterRunning(containers)
 	c.Assert(err, checker.IsNil)
 	c.Assert(containers, checker.HasLen, 1)
 
@@ -215,13 +150,12 @@ func (s *DockerSuite) TestDockerContainersWithLabels(c *check.C) {
 	file := s.adaptFile(c, "fixtures/docker/simple.toml", tempObjects)
 	defer os.Remove(file)
 
-	err := s.dockerService.Up(context.Background(), s.composeProject, api.UpOptions{})
-	c.Assert(err, checker.IsNil)
+	s.startServicesOnly(c, nil)
 
 	// Start traefik
 	cmd, display := s.traefikCmd(withConfigFile(file))
 	defer display(c)
-	err = cmd.Start()
+	err := cmd.Start()
 	c.Assert(err, checker.IsNil)
 	defer s.killCmd(cmd)
 
@@ -262,13 +196,12 @@ func (s *DockerSuite) TestDockerContainersWithOneMissingLabels(c *check.C) {
 	file := s.adaptFile(c, "fixtures/docker/simple.toml", tempObjects)
 	defer os.Remove(file)
 
-	err := s.dockerService.Up(context.Background(), s.composeProject, api.UpOptions{})
-	c.Assert(err, checker.IsNil)
+	s.startServicesOnly(c, nil)
 
 	// Start traefik
 	cmd, display := s.traefikCmd(withConfigFile(file))
 	defer display(c)
-	err = cmd.Start()
+	err := cmd.Start()
 	c.Assert(err, checker.IsNil)
 	defer s.killCmd(cmd)
 
@@ -295,13 +228,12 @@ func (s *DockerSuite) TestRestartDockerContainers(c *check.C) {
 	file := s.adaptFile(c, "fixtures/docker/simple.toml", tempObjects)
 	defer os.Remove(file)
 
-	err := s.dockerService.Up(context.Background(), s.composeProject, api.UpOptions{})
-	c.Assert(err, checker.IsNil)
+	s.startServicesOnly(c, nil)
 
 	// Start traefik
 	cmd, display := s.traefikCmd(withConfigFile(file))
 	defer display(c)
-	err = cmd.Start()
+	err := cmd.Start()
 	c.Assert(err, checker.IsNil)
 	defer s.killCmd(cmd)
 
@@ -337,4 +269,43 @@ func (s *DockerSuite) TestRestartDockerContainers(c *check.C) {
 
 	err = try.GetRequest("http://127.0.0.1:8080/api/rawdata", 60*time.Second, try.BodyContains("powpow"))
 	c.Assert(err, checker.IsNil)
+}
+
+func (s *DockerSuite) startServicesOnly(c *check.C, services []string) {
+	err := s.dockerService.Up(context.Background(), s.composeProject, api.UpOptions{})
+	c.Assert(err, checker.IsNil)
+
+	if len(services) == 0 {
+		return
+	}
+
+	containers, err := s.dockerService.Ps(context.Background(), s.composeProject.Name, api.PsOptions{})
+	c.Assert(err, checker.IsNil)
+
+	toStop := make([]string, 0)
+	for _, c := range containers {
+		foundSvc := false
+		for _, svc := range services {
+			if svc == c.Service {
+				foundSvc = true
+			}
+		}
+		if !foundSvc {
+			toStop = append(toStop, c.Service)
+		}
+	}
+
+	err = s.dockerService.Stop(context.Background(), s.composeProject, api.StopOptions{Services: toStop})
+	c.Assert(err, checker.IsNil)
+}
+
+func (s *DockerSuite) filterRunning(containers []api.ContainerSummary) []api.ContainerSummary {
+	runningContainers := make([]api.ContainerSummary, 0)
+
+	for _, c := range containers {
+		if strings.ToLower(c.State) == strings.ToLower(api.RUNNING) {
+			runningContainers = append(runningContainers, c)
+		}
+	}
+	return runningContainers
 }
