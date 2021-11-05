@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"os"
 	"time"
@@ -29,10 +30,10 @@ func (s *HealthCheckSuite) SetUpSuite(c *check.C) {
 	err := s.dockerService.Up(context.Background(), s.composeProject, api.UpOptions{})
 	c.Assert(err, checker.IsNil)
 
-	s.whoami1IP = "whoami1"
-	s.whoami2IP = "whoami2"
-	s.whoami3IP = "whoami3"
-	s.whoami4IP = "whoami4"
+	s.whoami1IP = s.getServiceIP(c, "whoami1")
+	s.whoami2IP = s.getServiceIP(c, "whoami2")
+	s.whoami3IP = s.getServiceIP(c, "whoami3")
+	s.whoami4IP = s.getServiceIP(c, "whoami4")
 }
 
 func (s *HealthCheckSuite) TestSimpleConfiguration(c *check.C) {
@@ -92,8 +93,8 @@ func (s *HealthCheckSuite) TestSimpleConfiguration(c *check.C) {
 	c.Assert(err, checker.IsNil)
 
 	// Check if the service with bad health check (whoami2) never respond.
-	err = try.Request(frontendReq, 2*time.Second, try.BodyContains(s.whoami2IP))
-	c.Assert(err, checker.Not(checker.IsNil))
+	err = try.Request(frontendReq, 5*time.Second, try.BodyContains(s.whoami2IP))
+	c.Assert(err, checker.NotNil)
 
 	// TODO validate : run on 80
 	resp, err := http.Get("http://127.0.0.1:8000/")
@@ -541,4 +542,12 @@ func (s *HealthCheckSuite) TestPropagateReload(c *check.C) {
 
 		c.Assert(string(body), checker.Contains, want)
 	}
+}
+
+func (s *HealthCheckSuite) getServiceIP(c *check.C, service string) string {
+	ips, err := net.LookupIP(service)
+	c.Assert(err, checker.IsNil)
+	c.Assert(ips, checker.HasLen, 1)
+
+	return ips[0].String()
 }
