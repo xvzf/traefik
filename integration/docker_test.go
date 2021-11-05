@@ -113,7 +113,7 @@ func (s *DockerSuite) TestDockerContainersWithTCPLabels(c *check.C) {
 	file := s.adaptFile(c, "fixtures/docker/simple.toml", tempObjects)
 	defer os.Remove(file)
 
-	s.startServicesOnly(c, []string{"withtcplables"})
+	s.startServicesOnly(c, []string{"withtcplabels"})
 
 	containers, err := s.dockerService.Ps(context.Background(), s.composeProject.Name, api.PsOptions{})
 	containers = s.filterRunning(containers)
@@ -150,7 +150,7 @@ func (s *DockerSuite) TestDockerContainersWithLabels(c *check.C) {
 	file := s.adaptFile(c, "fixtures/docker/simple.toml", tempObjects)
 	defer os.Remove(file)
 
-	s.startServicesOnly(c, nil)
+	s.startServicesOnly(c, []string{"withlabels1", "withlabels2"})
 
 	// Start traefik
 	cmd, display := s.traefikCmd(withConfigFile(file))
@@ -196,7 +196,7 @@ func (s *DockerSuite) TestDockerContainersWithOneMissingLabels(c *check.C) {
 	file := s.adaptFile(c, "fixtures/docker/simple.toml", tempObjects)
 	defer os.Remove(file)
 
-	s.startServicesOnly(c, nil)
+	s.startServicesOnly(c, []string{"withonelabelmissing"})
 
 	// Start traefik
 	cmd, display := s.traefikCmd(withConfigFile(file))
@@ -228,7 +228,7 @@ func (s *DockerSuite) TestRestartDockerContainers(c *check.C) {
 	file := s.adaptFile(c, "fixtures/docker/simple.toml", tempObjects)
 	defer os.Remove(file)
 
-	s.startServicesOnly(c, nil)
+	s.startServicesOnly(c, []string{"powpow"})
 
 	// Start traefik
 	cmd, display := s.traefikCmd(withConfigFile(file))
@@ -264,8 +264,7 @@ func (s *DockerSuite) TestRestartDockerContainers(c *check.C) {
 	err = try.GetRequest("http://127.0.0.1:8080/api/rawdata", 10*time.Second, try.BodyContains("powpow"))
 	c.Assert(err, checker.NotNil)
 
-	err = s.dockerService.Up(context.Background(), s.composeProject, api.UpOptions{})
-	c.Assert(err, checker.IsNil)
+	s.startServicesOnly(c, []string{"powpow"})
 
 	err = try.GetRequest("http://127.0.0.1:8080/api/rawdata", 60*time.Second, try.BodyContains("powpow"))
 	c.Assert(err, checker.IsNil)

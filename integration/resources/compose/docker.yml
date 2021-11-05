@@ -20,7 +20,7 @@ services:
     image: "swarm:1.0.0"
     command: [ "manage", "token://blablabla" ]
     labels:
-      traefik.http.Routers.Super.Rule: "Host(`my-super.host`)"
+      traefik.http.Routers.SuperHost.Rule: "Host(`my-super.host`)"
 
   withonelabelmissing:
     image: "swarm:1.0.0"
