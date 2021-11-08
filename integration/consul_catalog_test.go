@@ -191,7 +191,7 @@ func (s *ConsulCatalogSuite) TestByLabels(c *check.C) {
 	c.Assert(err, checker.IsNil)
 	defer s.killCmd(cmd)
 
-	err = try.GetRequest("http://127.0.0.1:8000/whoami", 10*time.Second, try.StatusCodeIs(http.StatusOK), try.BodyContainsOr("Hostname: whoami1", "Hostname: whoami2", "Hostname: whoami3"))
+	err = try.GetRequest("http://127.0.0.1:8000/whoami", 5*time.Second, try.StatusCodeIs(http.StatusOK), try.BodyContainsOr("Hostname: whoami1", "Hostname: whoami2", "Hostname: whoami3"))
 	c.Assert(err, checker.IsNil)
 
 	err = s.deregisterService("whoami1", false)
