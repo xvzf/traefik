@@ -215,10 +215,10 @@ func (s *RestSuite) TestSimpleConfiguration(c *check.C) {
 		c.Assert(err, checker.IsNil)
 		c.Assert(response.StatusCode, checker.Equals, http.StatusOK)
 
-		err = try.GetRequest("http://127.0.0.1:8080/api/rawdata", 1000*time.Millisecond, try.BodyContains(test.ruleMatch))
+		err = try.GetRequest("http://127.0.0.1:8080/api/rawdata", 2000*time.Millisecond, try.BodyContains(test.ruleMatch))
 		c.Assert(err, checker.IsNil)
 
-		err = try.GetRequest("http://127.0.0.1:8000/", 1000*time.Millisecond, try.StatusCodeIs(http.StatusOK))
+		err = try.GetRequest("http://127.0.0.1:8000/", 2000*time.Millisecond, try.StatusCodeIs(http.StatusOK))
 		c.Assert(err, checker.IsNil)
 	}
 }

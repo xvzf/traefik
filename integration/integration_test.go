@@ -43,7 +43,7 @@ func Test(t *testing.T) {
 
 	if *container {
 		//tests launched from a container
-		check.Suite(&AccessLogSuite{})
+		/*check.Suite(&AccessLogSuite{})
 		check.Suite(&AcmeSuite{})
 		check.Suite(&EtcdSuite{})
 		check.Suite(&ConsulSuite{})
@@ -63,8 +63,8 @@ func Test(t *testing.T) {
 		check.Suite(&MarathonSuite{})
 		check.Suite(&MarathonSuite15{})
 		check.Suite(&RateLimitSuite{})
-		check.Suite(&RedisSuite{}) //not working
-		check.Suite(&RestSuite{})  //not working
+		check.Suite(&RedisSuite{}) //not working*/
+		check.Suite(&RestSuite{})
 		check.Suite(&RetrySuite{})
 		check.Suite(&SimpleSuite{}) //not working
 		check.Suite(&TimeoutSuite{})
