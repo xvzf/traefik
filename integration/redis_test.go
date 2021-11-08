@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/abronan/valkeyrie"
@@ -148,12 +149,16 @@ func (s *RedisSuite) TestSimpleConfiguration(c *check.C) {
 	expected, err := os.ReadFile(expectedJSON)
 	c.Assert(err, checker.IsNil)
 
-	if !bytes.Equal(expected, got) {
+	// ensure json is minified before testing diff
+	expectedStr := minifyJson(string(expected))
+	gotStr := minifyJson(string(got))
+	
+	if !bytes.Equal([]byte(expectedStr), []byte(gotStr)) {
 		diff := difflib.UnifiedDiff{
 			FromFile: "Expected",
-			A:        difflib.SplitLines(string(expected)),
+			A:        difflib.SplitLines(expectedStr),
 			ToFile:   "Got",
-			B:        difflib.SplitLines(string(got)),
+			B:        difflib.SplitLines(minifyJson(string(got))),
 			Context:  3,
 		}
 
@@ -161,4 +166,8 @@ func (s *RedisSuite) TestSimpleConfiguration(c *check.C) {
 		c.Assert(err, checker.IsNil)
 		c.Error(text)
 	}
+}
+
+func minifyJson(s string) string {
+	return strings.ReplaceAll(strings.ReplaceAll(s, " ", ""), "\n", "")
 }
