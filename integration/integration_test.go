@@ -60,8 +60,8 @@ func Test(t *testing.T) {
 		check.Suite(&HTTPSSuite{})
 		check.Suite(&KeepAliveSuite{})
 		check.Suite(&LogRotationSuite{})
-		check.Suite(&MarathonSuite{})   //not working
-		check.Suite(&MarathonSuite15{}) //not working
+		check.Suite(&MarathonSuite{})
+		check.Suite(&MarathonSuite15{})
 		check.Suite(&RateLimitSuite{})
 		check.Suite(&RedisSuite{}) //not working
 		check.Suite(&RestSuite{})  //not working
