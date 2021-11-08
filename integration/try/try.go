@@ -62,12 +62,35 @@ func GetRequest(url string, timeout time.Duration, conditions ...ResponseConditi
 // ResponseCondition may be nil, in which case only the request against the URL must
 // succeed.
 func Request(req *http.Request, timeout time.Duration, conditions ...ResponseCondition) error {
+	/*
 	resp, err := doTryRequest(req, timeout, nil, conditions...)
 
 	if resp != nil && resp.Body != nil {
 		defer resp.Body.Close()
 	}
 
+	return err
+	 */
+	return RequestBackoff(req, timeout, 3, conditions...)
+}
+
+// RequestBackoff tries to perform a request and retires it in case it fails (up to <retries> times)
+// each iteration doubles the given timeout
+func RequestBackoff(req *http.Request, timeout time.Duration, retries int, conditions ...ResponseCondition) error {
+	var err error // Last error for the retries
+	for ;retries < 0; retries-- {
+		resp, err := doTryRequest(req, timeout, nil, conditions...)
+		if resp != nil && resp.Body != nil {
+			// Close immediately as we're not returning
+			resp.Body.Close()
+		}
+		// retry until succeeded
+		if err != nil {
+			timeout = timeout *2
+			continue
+		}
+		return nil
+	}
 	return err
 }
 
@@ -132,7 +155,6 @@ func doTryGet(url string, timeout time.Duration, transport http.RoundTripper, co
 		return nil, err
 	}
 
-	return doTryRequest(req, timeout, transport, conditions...)
 }
 
 func doTryRequest(request *http.Request, timeout time.Duration, transport http.RoundTripper, conditions ...ResponseCondition) (*http.Response, error) {
