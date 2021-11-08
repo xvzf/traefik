@@ -355,10 +355,10 @@ func (s *SimpleSuite) TestMetricsPrometheusTwoRoutersOneService(c *check.C) {
 		c.Assert(err, checker.IsNil)
 
 		// Reqs count of 1 for both routers
-		c.Assert(string(body), checker.Contains, "traefik_router_requests_total{code=\"200\",method=\"GET\",protocol=\"http\",router=\"router1@docker\",service=\"whoami1-integrationtestbase@docker\"} 1")
-		c.Assert(string(body), checker.Contains, "traefik_router_requests_total{code=\"200\",method=\"GET\",protocol=\"http\",router=\"router2@docker\",service=\"whoami1-integrationtestbase@docker\"} 1")
+		c.Assert(string(body), checker.Contains, "traefik_router_requests_total{code=\"200\",method=\"GET\",protocol=\"http\",router=\"router1@docker\",service=\"whoami1-base@docker\"} 1")
+		c.Assert(string(body), checker.Contains, "traefik_router_requests_total{code=\"200\",method=\"GET\",protocol=\"http\",router=\"router2@docker\",service=\"whoami1-base@docker\"} 1")
 		// Reqs count of 2 for service behind both routers
-		c.Assert(string(body), checker.Contains, "traefik_service_requests_total{code=\"200\",method=\"GET\",protocol=\"http\",service=\"whoami1-integrationtestbase@docker\"} 2")
+		c.Assert(string(body), checker.Contains, "traefik_service_requests_total{code=\"200\",method=\"GET\",protocol=\"http\",service=\"whoami1-base@docker\"} 2")
 	}
 }
 
@@ -367,8 +367,8 @@ func (s *SimpleSuite) TestMultipleProviderSameBackendName(c *check.C) {
 	err := s.dockerService.Up(context.Background(), s.composeProject, api.UpOptions{})
 	c.Assert(err, checker.IsNil)
 
-	ipWhoami01 := "whoami1"
-	ipWhoami02 := "whoami2"
+	ipWhoami01 := s.getServiceIP(c, "whoami1")
+	ipWhoami02 := s.getServiceIP(c, "whoami2")
 	file := s.adaptFile(c, "fixtures/multiple_provider.toml", struct{ IP string }{
 		IP: ipWhoami02,
 	})
@@ -724,8 +724,8 @@ func (s *SimpleSuite) TestWRR(c *check.C) {
 	err := s.dockerService.Up(context.Background(), s.composeProject, api.UpOptions{})
 	c.Assert(err, checker.IsNil)
 
-	server1 := "whoami1"
-	server2 := "whoami2"
+	server1 := s.getServiceIP(c, "whoami1")
+	server2 := s.getServiceIP(c, "whoami2")
 
 	file := s.adaptFile(c, "fixtures/wrr.toml", struct {
 		Server1 string
@@ -772,8 +772,8 @@ func (s *SimpleSuite) TestWRRSticky(c *check.C) {
 	err := s.dockerService.Up(context.Background(), s.composeProject, api.UpOptions{})
 	c.Assert(err, checker.IsNil)
 
-	server1 := "whoami1"
-	server2 := "whoami2"
+	server1 := s.getServiceIP(c, "whoami1")
+	server2 := s.getServiceIP(c, "whoami2")
 
 	file := s.adaptFile(c, "fixtures/wrr_sticky.toml", struct {
 		Server1 string

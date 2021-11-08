@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"context"
 	"flag"
+	"net"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -43,6 +44,7 @@ func Test(t *testing.T) {
 
 	if *container {
 		//tests launched from a container
+		<<<<<<< HEAD
 		// check.Suite(&AccessLogSuite{})
 		// check.Suite(&AcmeSuite{})
 		// check.Suite(&EtcdSuite{})
@@ -72,6 +74,37 @@ func Test(t *testing.T) {
 		// check.Suite(&TracingSuite{})
 		// check.Suite(&UDPSuite{})
 		// check.Suite(&WebsocketSuite{})
+		====== =
+		/*check.Suite(&AccessLogSuite{})
+		check.Suite(&AcmeSuite{})
+		check.Suite(&EtcdSuite{})
+		check.Suite(&ConsulSuite{})
+		check.Suite(&ConsulCatalogSuite{})
+		check.Suite(&DockerComposeSuite{})
+		check.Suite(&DockerSuite{})
+		check.Suite(&ErrorPagesSuite{})
+		check.Suite(&FileSuite{})
+		check.Suite(&GRPCSuite{})
+		check.Suite(&HealthCheckSuite{})
+		check.Suite(&HeadersSuite{})
+		check.Suite(&HostResolverSuite{})
+		check.Suite(&HTTPSuite{})
+		check.Suite(&HTTPSSuite{})
+		check.Suite(&KeepAliveSuite{})
+		check.Suite(&LogRotationSuite{})
+		check.Suite(&MarathonSuite{})
+		check.Suite(&MarathonSuite15{})
+		check.Suite(&RateLimitSuite{})
+		check.Suite(&RedisSuite{}) //not working
+		check.Suite(&RestSuite{})
+		check.Suite(&RetrySuite{})*/
+		check.Suite(&SimpleSuite{}) //not working
+		check.Suite(&TimeoutSuite{})
+		check.Suite(&TLSClientHeadersSuite{})
+		check.Suite(&TracingSuite{}) //not working
+		check.Suite(&UDPSuite{})
+		check.Suite(&WebsocketSuite{})
+		>>>>>>> abec41026(wip)
 		check.Suite(&ZookeeperSuite{}) //not working
 	}
 	if *host {
@@ -203,4 +236,12 @@ func (s *BaseSuite) adaptFile(c *check.C, path string, tempObjects interface{}) 
 
 func minifyJson(s string) string {
 	return strings.ReplaceAll(strings.ReplaceAll(s, " ", ""), "\n", "")
+}
+
+func (s *BaseSuite) getServiceIP(c *check.C, service string) string {
+	ips, err := net.LookupIP(service)
+	c.Assert(err, checker.IsNil)
+	c.Assert(ips, checker.HasLen, 1)
+
+	return ips[0].String()
 }

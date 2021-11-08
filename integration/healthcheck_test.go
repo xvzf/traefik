@@ -5,7 +5,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"net"
 	"net/http"
 	"os"
 	"time"
@@ -542,12 +541,4 @@ func (s *HealthCheckSuite) TestPropagateReload(c *check.C) {
 
 		c.Assert(string(body), checker.Contains, want)
 	}
-}
-
-func (s *HealthCheckSuite) getServiceIP(c *check.C, service string) string {
-	ips, err := net.LookupIP(service)
-	c.Assert(err, checker.IsNil)
-	c.Assert(ips, checker.HasLen, 1)
-
-	return ips[0].String()
 }
