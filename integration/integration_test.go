@@ -66,12 +66,12 @@ func Test(t *testing.T) {
 		// check.Suite(&RedisSuite{})
 		// check.Suite(&RestSuite{})
 		// check.Suite(&RetrySuite{})
-		check.Suite(&SimpleSuite{}) //not working
-		check.Suite(&TimeoutSuite{})
-		check.Suite(&TLSClientHeadersSuite{})
-		check.Suite(&TracingSuite{}) //not working
-		check.Suite(&UDPSuite{})
-		check.Suite(&WebsocketSuite{})
+		// check.Suite(&SimpleSuite{}) //not working
+		// check.Suite(&TimeoutSuite{})
+		// check.Suite(&TLSClientHeadersSuite{})
+		// check.Suite(&TracingSuite{})
+		// check.Suite(&UDPSuite{})
+		// check.Suite(&WebsocketSuite{})
 		check.Suite(&ZookeeperSuite{}) //not working
 	}
 	if *host {
@@ -199,4 +199,8 @@ func (s *BaseSuite) adaptFile(c *check.C, path string, tempObjects interface{}) 
 	c.Assert(err, checker.IsNil)
 
 	return tmpFile.Name()
+}
+
+func minifyJson(s string) string {
+	return strings.ReplaceAll(strings.ReplaceAll(s, " ", ""), "\n", "")
 }

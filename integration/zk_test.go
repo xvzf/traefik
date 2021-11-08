@@ -149,12 +149,16 @@ func (s *ZookeeperSuite) TestSimpleConfiguration(c *check.C) {
 	expected, err := os.ReadFile(expectedJSON)
 	c.Assert(err, checker.IsNil)
 
-	if !bytes.Equal(expected, got) {
+	// ensure json is minified before testing diff
+	expectedStr := minifyJson(string(expected))
+	gotStr := minifyJson(string(got))
+
+	if !bytes.Equal([]byte(expectedStr), []byte(gotStr)) {
 		diff := difflib.UnifiedDiff{
 			FromFile: "Expected",
-			A:        difflib.SplitLines(string(expected)),
+			A:        difflib.SplitLines(expectedStr),
 			ToFile:   "Got",
-			B:        difflib.SplitLines(string(got)),
+			B:        difflib.SplitLines(gotStr),
 			Context:  3,
 		}
 
