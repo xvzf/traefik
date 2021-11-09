@@ -92,7 +92,7 @@ func Do(timeout time.Duration, operation DoCondition) error {
 		panic("timeout must be larger than zero")
 	}
 
-	interval := time.Duration(math.Ceil(float64(timeout) / 15.0))
+	interval := time.Duration(math.Ceil(float64(timeout) / 4))
 	if interval > maxInterval {
 		interval = maxInterval
 	}
