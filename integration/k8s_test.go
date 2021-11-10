@@ -33,7 +33,7 @@ func (s *K8sSuite) SetUpSuite(c *check.C) {
 	err := s.dockerService.Up(context.Background(), s.composeProject, composeapi.UpOptions{})
 	c.Assert(err, checker.IsNil)
 
-	abs, err := filepath.Abs("./fixtures/k8s/config.skip/kubeconfig.yaml")
+	abs, err := filepath.Abs("/test/config/kubeconfig.yaml")
 	c.Assert(err, checker.IsNil)
 
 	err = try.Do(60*time.Second, func() error {
@@ -54,12 +54,12 @@ func (s *K8sSuite) TearDownSuite(c *check.C) {
 	}
 
 	generatedFiles := []string{
-		"./fixtures/k8s/config.skip/kubeconfig.yaml",
-		"./fixtures/k8s/config.skip/k3s.log",
-		"./fixtures/k8s/coredns.yaml",
-		"./fixtures/k8s/rolebindings.yaml",
-		"./fixtures/k8s/traefik.yaml",
-		"./fixtures/k8s/ccm.yaml",
+		"/test/config/kubeconfig.yaml",
+		"/test/config/k3s.log",
+		"/test/data/coredns.yaml",
+		"/test/data/rolebindings.yaml",
+		"/test/data/traefik.yaml",
+		"/test/data/ccm.yaml",
 	}
 
 	for _, filename := range generatedFiles {
