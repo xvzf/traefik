@@ -149,7 +149,7 @@ func testConfiguration(c *check.C, path, apiPort string) {
 	err = json.Unmarshal(buf.Bytes(), &rtRepr)
 	c.Assert(err, checker.IsNil)
 
-	newJSON, err := json.MarshalIndent(rtRepr, "", "\t")
+	newJSON, err := json.Marshal(rtRepr)
 	c.Assert(err, checker.IsNil)
 
 	err = os.WriteFile(expectedJSON, newJSON, 0o644)
@@ -181,7 +181,7 @@ func matchesConfig(wantConfig string, buf *bytes.Buffer) try.ResponseCondition {
 			}
 		}
 
-		got, err := json.MarshalIndent(obtained, "", "\t")
+		got, err := json.Marshal(obtained)
 		if err != nil {
 			return err
 		}
@@ -201,6 +201,7 @@ func matchesConfig(wantConfig string, buf *bytes.Buffer) try.ResponseCondition {
 		sanitizedExpected = rxServerStatus.ReplaceAll(sanitizedExpected, []byte(`"http://XXXX": $1`))
 		sanitizedGot = rxServerStatus.ReplaceAll(sanitizedGot, []byte(`"http://XXXX": $1`))
 
+		sanitizedExpected = []byte(minifyJSON(string(sanitizedExpected)))
 		if bytes.Equal(sanitizedExpected, sanitizedGot) {
 			return nil
 		}
