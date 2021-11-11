@@ -132,7 +132,7 @@ func testConfiguration(c *check.C, path, apiPort string) {
 	}
 
 	var buf bytes.Buffer
-	err = try.GetRequest("http://127.0.0.1:"+apiPort+"/api/rawdata", 1*time.Minute, try.StatusCodeIs(http.StatusOK), matchesConfig(expectedJSON, &buf))
+	err = try.GetRequest("http://127.0.0.1:"+apiPort+"/api/rawdata", 20*time.Second, try.StatusCodeIs(http.StatusOK), matchesConfig(expectedJSON, &buf))
 
 	if !*updateExpected {
 		if err != nil {
@@ -181,7 +181,7 @@ func matchesConfig(wantConfig string, buf *bytes.Buffer) try.ResponseCondition {
 			}
 		}
 
-		got, err := json.Marshal(obtained)
+		got, err := json.MarshalIndent(obtained, "", "  ")
 		if err != nil {
 			return err
 		}
@@ -201,7 +201,6 @@ func matchesConfig(wantConfig string, buf *bytes.Buffer) try.ResponseCondition {
 		sanitizedExpected = rxServerStatus.ReplaceAll(sanitizedExpected, []byte(`"http://XXXX": $1`))
 		sanitizedGot = rxServerStatus.ReplaceAll(sanitizedGot, []byte(`"http://XXXX": $1`))
 
-		sanitizedExpected = []byte(minifyJSON(string(sanitizedExpected)))
 		if bytes.Equal(sanitizedExpected, sanitizedGot) {
 			return nil
 		}
