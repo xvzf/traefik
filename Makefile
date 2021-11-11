@@ -16,7 +16,9 @@ REPONAME := $(shell echo $(REPO) | tr '[:upper:]' '[:lower:]')
 TRAEFIK_IMAGE := $(if $(REPONAME),$(REPONAME),"traefik/traefik")
 
 INTEGRATION_OPTS := $(if $(MAKE_DOCKER_HOST),-e "DOCKER_HOST=$(MAKE_DOCKER_HOST)", --name=traefik --rm \
--v "/var/run/docker.sock:/var/run/docker.sock" -v test-data:/test/data -v test-config:/test/config)
+-v "/var/run/docker.sock:/var/run/docker.sock" -v test-data:/test/data -v test-config:/test/config \
+-e KUBECONFIG="/test/config/kubeconfig.yaml")
+
 DOCKER_BUILD_ARGS := $(if $(DOCKER_VERSION), "--build-arg=DOCKER_VERSION=$(DOCKER_VERSION)",)
 
 TRAEFIK_ENVS := \
@@ -100,11 +102,13 @@ test-network:
 test-volumes:
 	docker volume create test-data || echo ""
 	docker volume create test-config || echo ""
+#ensure test data is populated
+	docker cp ./integration/fixtures/k8s/. test-data:/root/myfile.txt || echo ""
 
 ## Run the integration tests
 test-integration: $(PRE_TARGET) binary test-network test-volumes
 
-	$(if $(PRE_TARGET),$(DOCKER_RUN_TRAEFIK_TESTNET)) ./script/make.sh test-integration
+	$(if $(PRE_TARGET),$(DOCKER_RUN_TRAEFIK_TESTNET)) ./script/make.sh test-integration;true
 	docker network rm test-net || echo ""
 	docker volume rm test-data || echo ""
 	docker volume rm test-config || echo ""

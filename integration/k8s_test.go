@@ -19,7 +19,6 @@ import (
 	"github.com/pmezard/go-difflib/difflib"
 	"github.com/traefik/traefik/v2/integration/try"
 	"github.com/traefik/traefik/v2/pkg/api"
-	"github.com/traefik/traefik/v2/pkg/log"
 	checker "github.com/vdemeester/shakers"
 )
 
@@ -33,10 +32,9 @@ func (s *K8sSuite) SetUpSuite(c *check.C) {
 	err := s.dockerService.Up(context.Background(), s.composeProject, composeapi.UpOptions{})
 	c.Assert(err, checker.IsNil)
 
-	abs, err := filepath.Abs("/test/config/kubeconfig.yaml")
-	c.Assert(err, checker.IsNil)
+	abs := "/test/config/kubeconfig.yaml"
 
-	err = try.Do(60*time.Second, func() error {
+	err = try.Do(120*time.Second, func() error {
 		_, err := os.Stat(abs)
 		return err
 	})
@@ -49,24 +47,8 @@ func (s *K8sSuite) SetUpSuite(c *check.C) {
 func (s *K8sSuite) TearDownSuite(c *check.C) {
 	// shutdown and delete compose project
 	if s.composeProject != nil && s.dockerService != nil {
-		err := s.dockerService.Stop(context.Background(), s.composeProject, composeapi.StopOptions{})
+		err := s.dockerService.Down(context.Background(), s.composeProject.Name, composeapi.DownOptions{})
 		c.Assert(err, checker.IsNil)
-	}
-
-	generatedFiles := []string{
-		"/test/config/kubeconfig.yaml",
-		"/test/config/k3s.log",
-		"/test/data/coredns.yaml",
-		"/test/data/rolebindings.yaml",
-		"/test/data/traefik.yaml",
-		"/test/data/ccm.yaml",
-	}
-
-	for _, filename := range generatedFiles {
-		err := os.Remove(filename)
-		if err != nil {
-			log.WithoutContext().Warning(err)
-		}
 	}
 }
 
@@ -100,7 +82,7 @@ func (s *K8sSuite) TestCRDConfiguration(c *check.C) {
 	c.Assert(err, checker.IsNil)
 	defer s.killCmd(cmd)
 
-	testConfiguration(c, "testdata/rawdata-crd.json", "8000")
+	testConfiguration(c, "testdata/rawdata-crd.json", "8080")
 }
 
 func (s *K8sSuite) TestCRDLabelSelector(c *check.C) {
@@ -111,7 +93,7 @@ func (s *K8sSuite) TestCRDLabelSelector(c *check.C) {
 	c.Assert(err, checker.IsNil)
 	defer s.killCmd(cmd)
 
-	testConfiguration(c, "testdata/rawdata-crd-label-selector.json", "8000")
+	testConfiguration(c, "testdata/rawdata-crd-label-selector.json", "8080")
 }
 
 func (s *K8sSuite) TestGatewayConfiguration(c *check.C) {
