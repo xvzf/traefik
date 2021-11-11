@@ -41,6 +41,8 @@ func (s *K8sSuite) SetUpSuite(c *check.C) {
 	c.Assert(err, checker.IsNil)
 
 	err = os.Setenv("KUBECONFIG", abs)
+
+  time.Sleep(1 * time.Minute)
 	c.Assert(err, checker.IsNil)
 }
 
